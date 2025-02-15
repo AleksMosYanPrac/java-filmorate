@@ -15,7 +15,7 @@ import ru.yandex.practicum.filmorate.model.User;
  */
 
 @JsonTest
-public class UserSerializationComponentTest {
+public class UserSerializationTest {
 
     @Autowired
     private ObjectMapper mapper;

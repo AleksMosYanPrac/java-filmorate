@@ -1,11 +1,12 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.impls;
 
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ExistException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 
 @SpringBootTest
-class UserServiceComponentTest {
+class UserServiceTest {
 
     @Autowired
     private UserService userService;
@@ -37,8 +38,15 @@ class UserServiceComponentTest {
     }
 
     @Test
-    void shouldCreateUserBySettingLongID() {
-        User creatingUser = User.builder().login("asd").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
+    void onCreateShouldThrowValidateExceptionWhenCreatingUserHasBeenAddedWithProvidedLongID() {
+        User newUser = User.builder().id(1L).login("asd").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
+
+        assertThrows(ConstraintViolationException.class, () -> userService.create(newUser));
+    }
+
+    @Test
+    void shouldCreateUserBySettingLongID() throws ExistException {
+        User creatingUser = User.builder().login("as").email("x@x.com").birthday(LocalDate.of(2000, 12, 1)).build();
 
         User created = userService.create(creatingUser);
 
@@ -49,11 +57,12 @@ class UserServiceComponentTest {
     }
 
     @Test
-    void shouldCreateThanThrowIllegalArgumentExceptionWhenCreatingUserHasBeenAddedWithProvidedLongID() {
-        User newUser = User.builder().login("asd").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
-        User created = userService.create(newUser);
+    void shouldCreateThanThrowExistExceptionWhenCreatingUserAlreadyAddedWithProvidedLoginAndEmail()
+            throws ExistException {
+        User creatingUser = User.builder().login("a").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
+        userService.create(creatingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.create(created));
+        assertThrows(ExistException.class, () -> userService.create(creatingUser));
     }
 
     @Test
@@ -78,8 +87,8 @@ class UserServiceComponentTest {
     }
 
     @Test
-    void shouldUpdateUserByNewDataAndPreviousLongID() {
-        User creatingUser = User.builder().login("asd").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
+    void shouldUpdateUserByNewDataAndPreviousLongID() throws ExistException {
+        User creatingUser = User.builder().login("aaa").email("e@e.com").birthday(LocalDate.of(2000, 12, 1)).build();
         User created = userService.create(creatingUser);
         User updatingUser = created.toBuilder().login("updated").build();
 
@@ -91,10 +100,10 @@ class UserServiceComponentTest {
     }
 
     @Test
-    void shouldUpdateThanThrowNotFoundExceptionWhenUpdatingUserHasNotAddedWithProvidedLongID() {
+    void shouldUpdateThanThrowExistExceptionWhenUpdatingUserHasNotAddedWithProvidedLongID() {
         User updating = User.builder().id(Long.MAX_VALUE)
                 .login("asd").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
 
-        assertThrows(NotFoundException.class, () -> userService.update(updating));
+        assertThrows(ExistException.class, () -> userService.update(updating));
     }
 }

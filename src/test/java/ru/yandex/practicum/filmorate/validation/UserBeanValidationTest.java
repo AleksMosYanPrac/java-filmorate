@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 
 @SpringBootTest
-public class UserBeanValidationComponentTest {
+public class UserBeanValidationTest {
 
     @Autowired
     private Validator validator;
@@ -42,7 +42,16 @@ public class UserBeanValidationComponentTest {
     }
 
     @Test
-    void shouldValidateWithGroupWhenUserIsValid() {
+    void shouldValidateWithOnCreateGroupWhenUserIsValid() {
+        User user = User.builder().login("ex").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user, ValidationGroup.OnCreate.class);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void shouldValidateWithOnUpdateGroupWhenUserIsValid() {
         User user = User.builder().id(1L).login("ex").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, ValidationGroup.OnUpdate.class);
@@ -51,7 +60,17 @@ public class UserBeanValidationComponentTest {
     }
 
     @Test
-    void shouldNotValidateWithGroupWhenUserIsIsValidButAnotherFieldsNot() {
+    void shouldNotValidateWithOnCreateGroupWhenUserIsValidButGroupFieldsNot() {
+        User user = User.builder().login(" ex ").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user, ValidationGroup.OnCreate.class);
+
+        assertThat(violations).hasSize(1);
+        assertThat(violations).extracting(ConstraintViolation::getMessage).contains("must not contain whitespaces");
+    }
+
+    @Test
+    void shouldNotValidateWithOnUpdateGroupWhenUserIsValidButGroupFieldsNot() {
         User user = User.builder().id(1L).login(" ex ").email("ex@ex.com").birthday(LocalDate.of(2000, 12, 1)).build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, ValidationGroup.OnUpdate.class);

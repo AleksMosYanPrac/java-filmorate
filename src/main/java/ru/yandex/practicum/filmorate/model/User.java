@@ -21,7 +21,8 @@ import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
 @Builder(toBuilder = true)
 public class User {
 
-    @NotNull(groups = {OnUpdate.class}, message = "must be provided")
+    @Null(groups = OnCreate.class, message = "must be null")
+    @NotNull(groups = OnUpdate.class, message = "must be provided")
     Long id;
 
     @NotEmpty

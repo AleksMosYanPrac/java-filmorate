@@ -4,5 +4,9 @@ import jakarta.validation.groups.Default;
 
 public interface ValidationGroup {
 
-    interface OnUpdate extends Default {}
+    interface OnCreate extends Default {
+    }
+
+    interface OnUpdate extends Default {
+    }
 }
