@@ -11,8 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ExistException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,30 +24,30 @@ import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("${filmorate.endpoints.films}")
+@RequestMapping("${filmorate.endpoints.users}")
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
-public class FilmController {
+public class UserController {
 
-    private final FilmService filmService;
+    private final UserService userService;
 
     @PostMapping
     @ResponseStatus(CREATED)
     @Validated(OnCreate.class)
-    public Film addFilm(@RequestBody @Valid @NotNull Film film) throws ExistException {
-        return filmService.add(film);
+    User createUser(@RequestBody @Valid @NotNull User user) throws ExistException {
+        return userService.create(user);
     }
 
     @PutMapping
     @ResponseStatus(OK)
     @Validated(OnUpdate.class)
-    public Film updateFilm(@RequestBody @Valid @NotNull Film film) throws ExistException {
-        return filmService.update(film);
+    User updateUser(@RequestBody @Valid @NotNull User user) throws ExistException {
+        return userService.update(user);
     }
 
     @GetMapping
     @ResponseStatus(OK)
-    public List<Film> getAllFilms() {
-        return filmService.list();
+    List<User> getAllUsers() {
+        return userService.list();
     }
 
     @ExceptionHandler(ExistException.class)
