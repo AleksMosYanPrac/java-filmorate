@@ -1,69 +1,49 @@
 package ru.yandex.practicum.filmorate.service.impls;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ExistException;
+import ru.yandex.practicum.filmorate.mapping.UserMapper;
+import ru.yandex.practicum.filmorate.model.dto.UserData;
+import ru.yandex.practicum.filmorate.model.dto.UserInfo;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final Map<Long, User> users;
+    private final UserStorage userStorage;
+    private final UserMapper userMapper;
 
     @Override
-    public User create(User user) throws ExistException {
-        if (exist(user)) {
-            log.debug("Created user already exist with login:{}", user.getLogin());
-            throw new ExistException("User already exist");
-        }
-        User newUser = user.toBuilder().id(generate()).build();
-        users.put(newUser.getId(), newUser);
-        log.info("New User has been created with id={}", newUser.getId());
-        return newUser;
+    public UserData create(UserData user) throws ExistException {
+        return userMapper.toUserData(userStorage.add(userMapper.toUser(user)));
     }
 
     @Override
-    public User update(User user) throws ExistException {
-        if (!exist(user)) {
-            log.debug("User not exist with ID:{}", user.getId());
-            throw new ExistException("User not exist with ID:" + user.getId());
-        }
-        User userById = users.get(user.getId());
-        User updatedUser = user.toBuilder().id(userById.getId()).build();
-        users.replace(user.getId(), updatedUser);
-        log.info("User has been updated with id={}", updatedUser.getId());
-        return users.get(user.getId());
+    public UserData update(UserData user) throws ExistException {
+        User updatingUser = userStorage.findById(user.getId())
+                .toBuilder()
+                .login(user.getLogin())
+                .name(user.getName())
+                .birthday(user.getBirthday())
+                .email(user.getEmail())
+                .build();
+
+        return userMapper.toUserData(userStorage.update(updatingUser));
     }
 
     @Override
-    public List<User> list() {
-        return users.values().stream().toList();
+    public List<UserData> list() {
+        return userStorage.getAll().stream().map(userMapper::toUserData).toList();
     }
 
-    private boolean exist(User user) {
-        if (Objects.isNull(user.getId())) {
-            Predicate<User> predicate =
-                    (User u) -> u.getLogin().equals(user.getLogin()) || u.getEmail().equals(user.getEmail());
-            return users.values().stream().anyMatch(predicate);
-        } else {
-            return users.containsKey(user.getId());
-        }
-    }
-
-    private Long generate() {
-        return users.values()
-                       .stream()
-                       .mapToLong(User::getId)
-                       .max()
-                       .orElse(0) + 1;
+    @Override
+    public UserInfo getById(long id) throws ExistException {
+        return userMapper.toUserInfo(userStorage.findById(id));
     }
 }
