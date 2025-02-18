@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.ExistException;
+import ru.yandex.practicum.filmorate.mapping.impls.UserMapperImpl;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -18,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 @WebMvcTest({UserController.class})
+@Import(value = {UserMapperImpl.class})
 public class UserControllerTest {
 
     @Value("${filmorate.endpoints.users}")
@@ -74,6 +78,22 @@ public class UserControllerTest {
     }
 
     @Test
+    void canTakeGETRequestForGetUserByIdThanHttpStatusIsOK() throws Exception {
+        when(userService.getById(anyLong())).thenReturn(user);
+
+        mockMvc.perform(get(path + "/1"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void canValidateRequestBody() throws Exception {
+        mockMvc.perform(post(path).contentType(MediaType.APPLICATION_JSON).content(updateUserJson))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(put(path).contentType(MediaType.APPLICATION_JSON).content(newUserJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void canHandleConstraintViolationExceptionThanHttpStatusIsBadRequest() throws Exception {
         when(userService.create(any())).thenThrow(new ConstraintViolationException("constraint", new HashSet<>()));
         when(userService.update(any())).thenThrow(new ConstraintViolationException("constraint", new HashSet<>()));
@@ -85,18 +105,18 @@ public class UserControllerTest {
     }
 
     @Test
+    void canHandleRuntimeExceptionThanHttpStatusIsInternalServerError() throws Exception {
+        when(userService.update(any())).thenThrow(new RuntimeException("Runtime exception"));
+
+        mockMvc.perform(put(path).contentType(MediaType.APPLICATION_JSON).content(updateUserJson))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     void canHandleExistExceptionThanHttpStatusIsNotFound() throws Exception {
         when(userService.update(any())).thenThrow(new ExistException("Not found"));
 
         mockMvc.perform(put(path).contentType(MediaType.APPLICATION_JSON).content(updateUserJson))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void canValidateRequestBody() throws Exception {
-        mockMvc.perform(post(path).contentType(MediaType.APPLICATION_JSON).content(updateUserJson))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(put(path).contentType(MediaType.APPLICATION_JSON).content(newUserJson))
-                .andExpect(status().isBadRequest());
     }
 }

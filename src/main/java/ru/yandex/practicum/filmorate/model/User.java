@@ -1,12 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Value;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
 
@@ -38,8 +39,18 @@ public class User {
     @Past(message = "must be a date in the past")
     LocalDate birthday;
 
-    @JsonGetter
-    public String name() {
-        return Objects.isNull(name) || name.isBlank() ? login : name;
+    @Builder.Default
+    Set<Long> friendsId = new HashSet<>();
+
+    public String getName() {
+        return Objects.isNull(name) ? login : name;
+    }
+
+    public boolean addFriend(User user) {
+        return friendsId.add(user.getId());
+    }
+
+    public boolean removeFriend(User user) {
+        return friendsId.remove(user.getId());
     }
 }

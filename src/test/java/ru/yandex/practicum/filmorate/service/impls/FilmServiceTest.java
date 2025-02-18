@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service.impls;
 
 import jakarta.validation.ConstraintViolationException;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,86 +24,95 @@ class FilmServiceTest {
     @Autowired
     private FilmService filmService;
 
-    @Test
-    void onAddShouldThrowValidateExceptionWhenFilmContainsNotValidData() {
-        Film newFilm = Film.builder().name("").duration(100L).releaseDate(LocalDate.now()).build();
+    @Nested
+    class AddingNewFilm {
 
-        assertThrows(ConstraintViolationException.class, () -> filmService.add(newFilm));
+        @Test
+        void onAddShouldThrowValidateExceptionWhenFilmContainsNotValidData() {
+            Film newFilm = Film.builder().name("").duration(100L).releaseDate(LocalDate.now()).build();
+
+            assertThrows(ConstraintViolationException.class, () -> filmService.add(newFilm));
+        }
+
+        @Test
+        void onAddShouldThrowValidateExceptionWhenFilmIsNull() {
+            Film newFilm = null;
+
+            assertThrows(ConstraintViolationException.class, () -> filmService.add(newFilm));
+        }
+
+        @Test
+        void onAddShouldThrowValidateExceptionWhenAddedFilmHasLongID() {
+            Film newFilm = Film.builder().id(1L).name("asd").duration(100L).releaseDate(LocalDate.now()).build();
+
+            assertThrows(ConstraintViolationException.class, () -> filmService.add(newFilm));
+        }
+
+        @Test
+        void shouldAddFilmBySettingLongID() throws ExistException {
+            Film newFilm = Film.builder().name("ap").duration(100L).releaseDate(LocalDate.now()).build();
+
+            Film addedFilm = filmService.add(newFilm);
+
+            assertAll("Check Long id before and after add",
+                    () -> assertTrue(Objects.isNull(newFilm.getId())),
+                    () -> assertTrue(Objects.nonNull(addedFilm.getId()))
+            );
+        }
+
+        @Test
+        void shouldAddThanThrowExistExceptionWhenAddedFilmAlreadyAddedWithProvidedNameAndReleaseDate()
+                throws ExistException {
+            Film newFilm = Film.builder().name("asd").duration(100L).releaseDate(LocalDate.now()).build();
+            filmService.add(newFilm);
+
+            assertThrows(ExistException.class, () -> filmService.add(newFilm));
+        }
     }
 
-    @Test
-    void onAddShouldThrowValidateExceptionWhenFilmIsNull() {
-        Film newFilm = null;
+    @Nested
+    class UpdatingFilm {
 
-        assertThrows(ConstraintViolationException.class, () -> filmService.add(newFilm));
-    }
+        @Test
+        void onUpdateShouldThrowValidateExceptionWhenFilmNotContainLongID() {
+            Film updating = Film.builder().name("a").duration(100L).releaseDate(LocalDate.now()).build();
 
-    @Test
-    void onAddShouldThrowValidateExceptionWhenAddedFilmHasLongID() {
-        Film newFilm = Film.builder().id(1L).name("asd").duration(100L).releaseDate(LocalDate.now()).build();
+            assertThrows(ConstraintViolationException.class, () -> filmService.update(updating));
+        }
 
-        assertThrows(ConstraintViolationException.class, () -> filmService.add(newFilm));
-    }
+        @Test
+        void onUpdateShouldThrowValidateExceptionWhenFilmIsNull() {
+            Film updating = null;
 
-    @Test
-    void shouldAddFilmBySettingLongID() throws ExistException {
-        Film newFilm = Film.builder().name("ap").duration(100L).releaseDate(LocalDate.now()).build();
+            assertThrows(ConstraintViolationException.class, () -> filmService.update(updating));
+        }
 
-        Film addedFilm = filmService.add(newFilm);
+        @Test
+        void onUpdateShouldThrowValidateExceptionWhenFilmContainNotValidData() {
+            Film updating = Film.builder().id(1L).name(" ").duration(100L).releaseDate(LocalDate.now()).build();
 
-        assertAll("Check Long id before and after add",
-                () -> assertTrue(Objects.isNull(newFilm.getId())),
-                () -> assertTrue(Objects.nonNull(addedFilm.getId()))
-        );
-    }
+            assertThrows(ConstraintViolationException.class, () -> filmService.update(updating));
+        }
 
-    @Test
-    void shouldAddThanThrowExistExceptionWhenAddedFilmAlreadyAddedWithProvidedNameAndReleaseDate()
-            throws ExistException {
-        Film newFilm = Film.builder().name("asd").duration(100L).releaseDate(LocalDate.now()).build();
-        filmService.add(newFilm);
+        @Test
+        void shouldUpdateFilmByNewDataAndPreviousLongID() throws ExistException {
+            Film newFilm = Film.builder().name("asd").duration(100L).releaseDate(LocalDate.now()).build();
+            Film added = filmService.add(newFilm);
+            Film updating = added.toBuilder().name("updated").build();
 
-        assertThrows(ExistException.class, () -> filmService.add(newFilm));
-    }
+            Film updated = filmService.update(updating);
 
-    @Test
-    void onUpdateShouldThrowValidateExceptionWhenFilmNotContainLongID() {
-        Film updating = Film.builder().name("a").duration(100L).releaseDate(LocalDate.now()).build();
+            assertNotEquals(added.getName(), updated.getName(), "Name hasn't been updated");
+            assertEquals(added.getId(), updated.getId(), "ID before and after update not equal");
+            assertEquals("updated", updated.getName());
+        }
 
-        assertThrows(ConstraintViolationException.class, () -> filmService.update(updating));
-    }
+        @Test
+        void shouldUpdateThanThrowExistExceptionWhenUpdatingFilmHasNotAddedWithProvidedLongId() {
+            Film updating = Film.builder().id(Long.MAX_VALUE).name("a").duration(100L)
+                    .releaseDate(LocalDate.now()).build();
 
-    @Test
-    void onUpdateShouldThrowValidateExceptionWhenFilmIsNull() {
-        Film updating = null;
-
-        assertThrows(ConstraintViolationException.class, () -> filmService.update(updating));
-    }
-
-    @Test
-    void onUpdateShouldThrowValidateExceptionWhenFilmContainNotValidData() {
-        Film updating = Film.builder().id(1L).name(" ").duration(100L).releaseDate(LocalDate.now()).build();
-
-        assertThrows(ConstraintViolationException.class, () -> filmService.update(updating));
-    }
-
-    @Test
-    void shouldUpdateFilmByNewDataAndPreviousLongID() throws ExistException {
-        Film newFilm = Film.builder().name("asd").duration(100L).releaseDate(LocalDate.now()).build();
-        Film added = filmService.add(newFilm);
-        Film updating = added.toBuilder().name("updated").build();
-
-        Film updated = filmService.update(updating);
-
-        assertNotEquals(added.getName(), updated.getName(), "Name hasn't been updated");
-        assertEquals(added.getId(), updated.getId(), "ID before and after update not equal");
-        assertEquals("updated", updated.getName());
-    }
-
-    @Test
-    void shouldUpdateThanThrowExistExceptionWhenUpdatingFilmHasNotAddedWithProvidedLongId() {
-        Film updating = Film.builder().id(Long.MAX_VALUE).name("a").duration(100L).releaseDate(LocalDate.now()).build();
-
-        assertThrows(ExistException.class, () -> filmService.update(updating));
+            assertThrows(ExistException.class, () -> filmService.update(updating));
+        }
     }
 }

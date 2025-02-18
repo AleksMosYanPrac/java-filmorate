@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
 import ru.yandex.practicum.filmorate.validation.AfterDate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
 
@@ -17,7 +19,7 @@ import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
  * <p> 3. дата релиза — не раньше 28 декабря 1895 года;
  * <p> 4. продолжительность фильма должна быть положительным числом.
  */
-@Data
+@Value
 @Builder(toBuilder = true)
 public class Film {
 
@@ -25,21 +27,37 @@ public class Film {
 
     @Null(groups = OnCreate.class, message = "must be null")
     @NotNull(groups = OnUpdate.class, message = "must be not null")
-    private Long id;
+    Long id;
 
     @NotBlank(message = "must be not blank")
-    private String name;
+    String name;
 
     @AfterDate(year = 1895, month = 12, day = 28)
-    private LocalDate releaseDate;
+    LocalDate releaseDate;
 
     @Size(max = 200, message = "must be less then {max} symbols")
-    private String description;
+    String description;
 
     @Positive
-    private long duration;
+    long duration;
+
+    @Builder.Default
+    Set<Long> usersId = new HashSet<>();
+
+    public long rate() {
+        return usersId.size();
+    }
+
+    public boolean likeItBy(User user) {
+        return usersId.add(user.getId());
+    }
+
+    public boolean unlikeItBy(User user) {
+        return usersId.remove(user.getId());
+    }
 
     public String getFormattedReleaseDate() {
         return releaseDate.format(FORMATTER);
     }
+
 }

@@ -16,6 +16,8 @@ public interface FilmService {
     @Validated(OnCreate.class)
     Film add(@Valid @NotNull Film film) throws ExistException;
 
+    Film getById(long id) throws ExistException;
+
     @Validated(OnUpdate.class)
     Film update(@Valid @NotNull Film film) throws ExistException;
 

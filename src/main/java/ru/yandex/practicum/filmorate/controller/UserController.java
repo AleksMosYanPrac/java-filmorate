@@ -1,22 +1,19 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ExistException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.mapping.UserMapper;
+import ru.yandex.practicum.filmorate.mapping.dto.UserData;
+import ru.yandex.practicum.filmorate.mapping.dto.UserInfo;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.http.HttpStatus.*;
 import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
@@ -29,42 +26,40 @@ import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
 public class UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @PostMapping
     @ResponseStatus(CREATED)
     @Validated(OnCreate.class)
-    User createUser(@RequestBody @Valid @NotNull User user) throws ExistException {
-        return userService.create(user);
+    UserData createUser(@RequestBody @Valid @NotNull UserData user) throws ExistException {
+        return userMapper.toUserData(
+                userService.create(userMapper.toUser(user))
+        );
     }
 
     @PutMapping
     @ResponseStatus(OK)
     @Validated(OnUpdate.class)
-    User updateUser(@RequestBody @Valid @NotNull User user) throws ExistException {
-        return userService.update(user);
+    UserData updateUser(@RequestBody @Valid @NotNull UserData user) throws ExistException {
+        return userMapper.toUserData(
+                userService.update(userMapper.toUser(user))
+        );
     }
 
     @GetMapping
     @ResponseStatus(OK)
-    List<User> getAllUsers() {
-        return userService.list();
+    List<UserData> getAllUsers() {
+        return userService.list()
+                .stream()
+                .map(userMapper::toUserData)
+                .toList();
     }
 
-    @ExceptionHandler(ExistException.class)
-    ResponseEntity<Map<String, String>> onExistException(ExistException exception) {
-        Map<String, String> body = new HashMap<>();
-        body.put("message", exception.getMessage());
-        log.info("ExistException: {}", exception.getMessage());
-        return new ResponseEntity<>(body, NOT_FOUND);
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    ResponseEntity<Map<String, String>> onConstraintViolation(ConstraintViolationException exception) {
-        Map<String, String> body = new HashMap<>();
-        for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
-            body.put(violation.getPropertyPath().toString(), violation.getMessage());
-        }
-        log.info("BeanValidation fail: {}", body);
-        return new ResponseEntity<>(body, BAD_REQUEST);
+    @GetMapping("/{userId}")
+    @ResponseStatus(OK)
+    UserInfo getUserById(@PathVariable long userId) throws ExistException {
+        return userMapper.toUserInfo(
+                userService.getById(userId)
+        );
     }
 }

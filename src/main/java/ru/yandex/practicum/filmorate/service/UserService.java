@@ -16,6 +16,8 @@ public interface UserService {
     @Validated(OnCreate.class)
     User create(@Valid @NotNull User user) throws ExistException;
 
+    User getById(long id) throws ExistException;
+
     @Validated(OnUpdate.class)
     User update(@Valid @NotNull User user) throws ExistException;
 
