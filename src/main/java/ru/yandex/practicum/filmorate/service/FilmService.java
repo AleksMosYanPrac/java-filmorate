@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.model.dto.FilmInfo;
 
 import java.util.List;
 
-
 public interface FilmService {
 
     FilmData add(FilmData film) throws ExistException;
