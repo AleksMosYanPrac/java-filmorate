@@ -10,3 +10,12 @@ filmorate:
   endpoints:
     users: "/users"
     films: "/films"
+  film:
+    popular:
+      count: 10
+
+  logging:
+    level:
+      org:
+        zalando:
+          logbook: TRACE

@@ -1,23 +1,18 @@
 package ru.yandex.practicum.filmorate.service;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.exception.ExistException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.dto.FilmData;
+import ru.yandex.practicum.filmorate.model.dto.FilmInfo;
 
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
-
-@Validated
 public interface FilmService {
 
-    @Validated(OnCreate.class)
-    Film add(@Valid @NotNull Film film) throws ExistException;
+    FilmData add(FilmData film) throws ExistException;
 
-    @Validated(OnUpdate.class)
-    Film update(@Valid @NotNull Film film) throws ExistException;
+    FilmData update(FilmData film) throws ExistException;
 
-    List<Film> list();
+    List<FilmData> list();
+
+    FilmInfo getById(long id) throws ExistException;
 }
