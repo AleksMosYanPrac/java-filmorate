@@ -47,3 +47,6 @@ db/*
 
 ### GIGAIDE ###
 .gigaide
+
+### database ###
+database/
