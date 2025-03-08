@@ -1,32 +1,39 @@
 package ru.yandex.practicum.filmorate.controller.serialization;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.boot.test.json.JacksonTester;
+import ru.yandex.practicum.filmorate.TestUserData;
 import ru.yandex.practicum.filmorate.model.dto.UserData;
 
-import java.time.LocalDate;
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Checks serialization for {@link UserData}
  */
 
-public class UserDataSerializationTest extends AbstractSerializationTest {
+@JsonTest
+public class UserDataSerializationTest {
+
+    @Autowired
+    private JacksonTester<UserData> mapper;
 
     @Test
-    void shouldSerializeUserDataObjectToJson() throws JsonProcessingException {
-        UserData user = UserData.builder().name("name").login("de").id(1L).build();
-        String json = "{\"id\":1,\"login\":\"de\",\"email\":null,\"name\":\"name\",\"birthday\":null}";
+    void shouldSerializeUserDataObjectToJson() throws IOException {
+        UserData user = TestUserData.getUserData();
+        String json = TestUserData.getUserDataJson();
 
-        Assertions.assertEquals(json, mapper.writeValueAsString(user));
+        assertThat(mapper.write(user)).isEqualToJson(json);
     }
 
     @Test
-    void shouldDeserializeJsonToUserDataObject() throws JsonProcessingException {
-        LocalDate birthday = LocalDate.of(2000, 12, 12);
-        UserData user = UserData.builder().name("name").login("de").id(1L).birthday(birthday).build();
-        String json = "{\"id\":1,\"login\":\"de\",\"email\":null,\"name\":\"name\",\"birthday\":\"2000-12-12\"}";
+    void shouldDeserializeJsonToUserDataObject() throws IOException {
+        String json = TestUserData.getUserDataJson();
+        UserData user = TestUserData.getUserData();
 
-        Assertions.assertEquals(user, mapper.readValue(json, UserData.class));
+        assertThat(mapper.parseObject(json)).isEqualTo(user);
     }
 }

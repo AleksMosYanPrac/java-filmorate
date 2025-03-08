@@ -1,13 +1,41 @@
 package ru.yandex.practicum.filmorate.mapping.impls;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ExistException;
 import ru.yandex.practicum.filmorate.mapping.FilmMapper;
 import ru.yandex.practicum.filmorate.model.dto.FilmData;
 import ru.yandex.practicum.filmorate.model.dto.FilmInfo;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.service.GenreService;
+import ru.yandex.practicum.filmorate.service.MPARatingService;
+
+import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class FilmMapperImpl implements FilmMapper {
+
+    private final GenreService genreService;
+    private final MPARatingService mpaRatingService;
+
+    @Override
+    public Film toFilm(FilmData filmData) throws ExistException {
+        return Film.builder()
+                .id(filmData.getId())
+                .name(filmData.getName())
+                .releaseDate(filmData.getReleaseDate())
+                .duration(filmData.getDuration())
+                .description(filmData.getDescription())
+                .mpaRating(mpaRatingService.getMPARatingById(filmData.getMpa().getId()))
+                .genres(genreService.getGenresByIdList(
+                        filmData.getGenres().stream()
+                                .map(Genre::getId)
+                                .collect(Collectors.toSet())))
+                .build();
+    }
 
     @Override
     public FilmData toFilmData(Film film) {
@@ -16,7 +44,9 @@ public class FilmMapperImpl implements FilmMapper {
                 film.getName(),
                 film.getReleaseDate(),
                 film.getDescription(),
-                film.getDuration()
+                film.getDuration(),
+                film.getMpaRating(),
+                film.getGenres()
         );
     }
 
@@ -28,18 +58,9 @@ public class FilmMapperImpl implements FilmMapper {
                 film.getFormattedReleaseDate(),
                 film.getDescription(),
                 film.getDuration(),
-                film.rate()
+                film.rate(),
+                film.getGenres(),
+                film.getMpaRating()
         );
-    }
-
-    @Override
-    public Film toFilm(FilmData filmData) {
-        return Film.builder()
-                .id(filmData.getId())
-                .name(filmData.getName())
-                .releaseDate(filmData.getReleaseDate())
-                .duration(filmData.getDuration())
-                .description(filmData.getDescription())
-                .build();
     }
 }

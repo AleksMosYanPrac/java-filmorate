@@ -1,0 +1,74 @@
+Project FILMORATE_DB {
+    database_type: 'PostgreSQL'
+    Note: '''
+    # Project of database for Filmorate application 
+        * [filmorate app](https://github.com/AleksMosYanPrac/java-filmorate)
+
+    ### Description
+        * Database structure defined by DBML
+        * DBML Docs: https://dbml.dbdiagram.io/docs
+        * simple database visualizer at [dbdiagram.io](http://dbdiagram.io)
+    '''
+}
+
+Table films {
+    id bigint [pk, increment]
+    name varchar() [not null]
+    description varchar(200)
+    release_date date [not null]
+    duration bigint
+    mpa_rating bigint [ref: > mpa_rating.id]
+    indexes {
+      (name, release_date) [unique]
+    }
+    Note: 'Stores film data'
+}
+
+Table film_genre {
+    film_id bigint [ref: > films.id]
+    genre_id bigint [ref: > genres.id]
+    indexes {
+      (film_id,genre_id) [unique]
+    }
+    Note: 'Stores genres for film '
+}
+
+Table genres {
+    id bigint [pk, increment]
+    name varchar
+    Note: 'Stores genre'
+}
+
+Table mpa_rating{
+    id bigint [pk, increment]
+    name varchar [not null]
+    Note: 'Stores MPA rating for films'
+}
+
+Table likes_rating{
+    film_id integer [ref: > films.id]
+    user_id integer [ref: > users.id]
+    indexes {
+      (film_id,user_id) [unique]
+    }
+    Note: 'Stores film likes'
+}
+
+Table users {
+    id bigint [pk, increment]
+    login varchar [not null, unique]
+    email varchar [not null, unique]
+    name varchar
+    birthday date [not null]
+    Note: 'Stores user data'
+}
+
+Table friends {
+    user_id bigint [ref: > users.id]
+    friend_id bigint [ref: > users.id]
+    status varchar [default: 'REQUESTED']
+    indexes {
+      (user_id,friend_id) [unique]
+    }
+    Note: 'Stores friendship links for users'
+}

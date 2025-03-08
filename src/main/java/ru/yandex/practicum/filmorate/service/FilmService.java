@@ -15,4 +15,5 @@ public interface FilmService {
     List<FilmData> list();
 
     FilmInfo getById(long id) throws ExistException;
+
 }

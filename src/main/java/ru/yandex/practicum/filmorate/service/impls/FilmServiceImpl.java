@@ -6,9 +6,9 @@ import ru.yandex.practicum.filmorate.exception.ExistException;
 import ru.yandex.practicum.filmorate.mapping.FilmMapper;
 import ru.yandex.practicum.filmorate.model.dto.FilmData;
 import ru.yandex.practicum.filmorate.model.dto.FilmInfo;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.repository.FilmStorage;
 
 import java.util.List;
 
@@ -21,17 +21,19 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public FilmData add(FilmData film) throws ExistException {
-        return filmMapper.toFilmData(filmStorage.add(filmMapper.toFilm(film)));
+        return filmMapper.toFilmData(filmStorage.create(filmMapper.toFilm(film)));
     }
 
     @Override
     public FilmData update(FilmData film) throws ExistException {
         Film updatingFilm = filmStorage.findById(film.getId())
+                .orElseThrow(() -> new ExistException("Film not exist with ID: " + film.getId()))
                 .toBuilder()
                 .name(film.getName())
                 .description(film.getDescription())
                 .releaseDate(film.getReleaseDate())
                 .duration(film.getDuration())
+                .mpaRating(film.getMpa())
                 .build();
 
         return filmMapper.toFilmData(filmStorage.update(updatingFilm));
@@ -39,11 +41,12 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<FilmData> list() {
-        return filmStorage.getAll().stream().map(filmMapper::toFilmData).toList();
+        return filmStorage.findAll().stream().map(filmMapper::toFilmData).toList();
     }
 
     @Override
     public FilmInfo getById(long id) throws ExistException {
-        return filmMapper.toFilmInfo(filmStorage.findById(id));
+        return filmMapper.toFilmInfo(filmStorage.findById(id)
+                .orElseThrow(() -> new ExistException("Film not exist with ID: " + id)));
     }
 }

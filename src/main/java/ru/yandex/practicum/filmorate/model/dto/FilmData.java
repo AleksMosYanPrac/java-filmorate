@@ -1,13 +1,21 @@
 package ru.yandex.practicum.filmorate.model.dto;
 
 import jakarta.validation.constraints.*;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.MPARating;
 import ru.yandex.practicum.filmorate.validation.AfterDate;
 import ru.yandex.practicum.filmorate.validation.ValidationGroup;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class FilmData {
 
     @Null(groups = ValidationGroup.OnCreate.class, message = "must be null")
@@ -25,4 +33,9 @@ public class FilmData {
 
     @Positive
     long duration;
+
+    @NotNull
+    MPARating mpa;
+
+    Set<Genre> genres = new HashSet<>();
 }

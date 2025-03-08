@@ -10,13 +10,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.TestFilmData;
 import ru.yandex.practicum.filmorate.exception.ExistException;
 
 import ru.yandex.practicum.filmorate.model.dto.FilmData;
 import ru.yandex.practicum.filmorate.model.dto.FilmInfo;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -48,12 +48,10 @@ public class FilmControllerTest {
 
     @BeforeEach
     public void setup() {
-        this.filmData = new FilmData(1L, "a", LocalDate.now(), "-", 10L);
-        this.filmInfo = new FilmInfo(1L, "a", "2025-02-08", "-", 10L, 1L);
-        this.newFilmJson = "{\"name\":\"film\",\"releaseDate\":\"2025-02-08\"," +
-                           "\"description\":\"-\",\"duration\":10}";
-        this.updateFilmJson = "{\"id\":1,\"name\":\"film\",\"releaseDate\":\"2025-02-08\"," +
-                              "\"description\":\"-\",\"duration\":10}";
+        this.filmData = TestFilmData.getFilmData();
+        this.filmInfo = TestFilmData.getFilmInfo();
+        this.newFilmJson = TestFilmData.getNewFilmJson();
+        this.updateFilmJson = TestFilmData.getUpdatedFilmJson();
     }
 
     @Test
