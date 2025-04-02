@@ -126,7 +126,7 @@ public class FilmStorageImpl implements FilmStorage {
     public boolean exist(long id) {
         String sql = "SELECT EXISTS(SELECT 1 FROM FILMS WHERE ID =:film_id)";
         return jdbcClient.sql(sql)
-                .param("film_id")
+                .param("film_id", id)
                 .query(Boolean.class)
                 .single();
     }
