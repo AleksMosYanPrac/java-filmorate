@@ -25,4 +25,6 @@ public interface UserStorage {
     List<User> findFriendsForUserById(long userId);
 
     List<User> findCommonFriendsForUsersById(long userId, long otherUserId);
+
+    boolean exist(long id);
 }

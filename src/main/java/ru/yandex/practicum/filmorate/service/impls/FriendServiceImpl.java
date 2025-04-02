@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ExistException;
-import ru.yandex.practicum.filmorate.mapping.IdMapper;
 import ru.yandex.practicum.filmorate.mapping.UserMapper;
 import ru.yandex.practicum.filmorate.model.dto.UserInfo;
 import ru.yandex.practicum.filmorate.model.user.Friends;
@@ -20,15 +19,15 @@ import java.util.List;
 public class FriendServiceImpl implements FriendService {
 
     private final FriendsStorage friendsStorage;
-    private final IdMapper idMapper;
     private final UserStorage userStorage;
     private final UserMapper userMapper;
 
     @Override
     public void addToFriends(long userId, long friendId) throws ExistException {
-        Friends friends = friendsStorage.findById(idMapper.toUserId(userId));
+        checkExistence(userId, friendId);
+        Friends friends = friendsStorage.findById(userId);
 
-        if (friends.add(idMapper.toUserId(friendId))) {
+        if (friends.add(friendId)) {
             friendsStorage.save(friends);
             log.info("User with id:{} add friend with id:{}", userId, friendId);
         } else {
@@ -36,11 +35,13 @@ public class FriendServiceImpl implements FriendService {
         }
     }
 
+
     @Override
     public void removeFromFriends(long userId, long friendId) throws ExistException {
-        Friends friends = friendsStorage.findById(idMapper.toUserId(userId));
+        checkExistence(userId, friendId);
+        Friends friends = friendsStorage.findById(userId);
 
-        if (friends.remove(idMapper.toUserId(friendId))) {
+        if (friends.remove(friendId)) {
             friendsStorage.save(friends);
             log.info("User with id:{} remove friend with id:{}", userId, friendId);
         } else {
@@ -50,7 +51,8 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public List<UserInfo> listFriends(long userId) throws ExistException {
-        return userStorage.findFriendsForUserById(idMapper.toUserId(userId))
+        checkExistence(userId);
+        return userStorage.findFriendsForUserById(userId)
                 .stream()
                 .map(userMapper::toUserInfo)
                 .toList();
@@ -58,9 +60,21 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public List<UserInfo> listCommonFriends(long userId, long otherUserId) throws ExistException {
-        return userStorage.findCommonFriendsForUsersById(idMapper.toUserId(userId), idMapper.toUserId(otherUserId))
+        checkExistence(userId, otherUserId);
+        return userStorage.findCommonFriendsForUsersById(userId, otherUserId)
                 .stream()
                 .map(userMapper::toUserInfo)
                 .toList();
+    }
+
+    private void checkExistence(long userId, long otherUserId) throws ExistException {
+        checkExistence(userId);
+        checkExistence(otherUserId);
+    }
+
+    private void checkExistence(long userId) throws ExistException {
+        if (!userStorage.exist(userId)) {
+            throw new ExistException("User not exist with ID:" + userId);
+        }
     }
 }

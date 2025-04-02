@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.repository.jdbc;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class FriendsStorageImpl implements FriendsStorage {
@@ -68,7 +66,6 @@ public class FriendsStorageImpl implements FriendsStorage {
                 .stream()
                 .map(e -> String.format("(%d,%d,'%s')", friends.getUserId(), e.getKey(), e.getValue().toString()))
                 .collect(Collectors.joining(","));
-
     }
 
     private record FriendsExtractor(Long userId) implements ResultSetExtractor<Friends> {

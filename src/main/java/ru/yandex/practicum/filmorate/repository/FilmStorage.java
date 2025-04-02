@@ -23,4 +23,6 @@ public interface FilmStorage {
     List<Film> findAll();
 
     List<Film> sortByRateAndLimitResult(long listSize);
+
+    boolean exist(long id);
 }

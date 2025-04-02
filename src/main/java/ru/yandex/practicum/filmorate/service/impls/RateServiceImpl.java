@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ExistException;
 import ru.yandex.practicum.filmorate.mapping.FilmMapper;
-import ru.yandex.practicum.filmorate.mapping.IdMapper;
 import ru.yandex.practicum.filmorate.model.dto.FilmInfo;
 import ru.yandex.practicum.filmorate.model.film.LikesRating;
 import ru.yandex.practicum.filmorate.repository.FilmStorage;
 import ru.yandex.practicum.filmorate.repository.LikesRatingStorage;
+import ru.yandex.practicum.filmorate.repository.UserStorage;
 import ru.yandex.practicum.filmorate.service.RateService;
 
 import java.util.List;
@@ -20,16 +20,16 @@ import java.util.List;
 public class RateServiceImpl implements RateService {
 
     private final LikesRatingStorage likesRatingStorage;
-    private final IdMapper idMapper;
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private final FilmMapper filmMapper;
 
     @Override
     public void putLike(long filmId, long userId) throws ExistException {
+        checkExistence(filmId, userId);
+        LikesRating rating = likesRatingStorage.findById(filmId);
 
-        LikesRating rating = likesRatingStorage.findById(idMapper.toFilmId(filmId));
-
-        if (rating.addLike(idMapper.toUserId(userId))) {
+        if (rating.addLike(userId)) {
             likesRatingStorage.save(rating);
             log.info("Film with id:{} has been liked by User with id{}", filmId, userId);
         } else {
@@ -39,10 +39,10 @@ public class RateServiceImpl implements RateService {
 
     @Override
     public void removeLike(long filmId, long userId) throws ExistException {
+        checkExistence(filmId, userId);
+        LikesRating rating = likesRatingStorage.findById(filmId);
 
-        LikesRating rating = likesRatingStorage.findById(idMapper.toFilmId(filmId));
-
-        if (rating.deleteLike(idMapper.toUserId(userId))) {
+        if (rating.deleteLike(userId)) {
             likesRatingStorage.save(rating);
             log.info("Film with id:{} been unliked by User with id{}", filmId, userId);
         } else {
@@ -56,5 +56,14 @@ public class RateServiceImpl implements RateService {
                 .stream()
                 .map(filmMapper::toFilmInfo)
                 .toList();
+    }
+
+    private void checkExistence(long filmId, long userId) throws ExistException {
+        if (!filmStorage.exist(filmId)) {
+            throw new ExistException("Film not exist with ID:" + filmId);
+        }
+        if (!userStorage.exist(userId)) {
+            throw new ExistException("User not exist with ID:" + userId);
+        }
     }
 }

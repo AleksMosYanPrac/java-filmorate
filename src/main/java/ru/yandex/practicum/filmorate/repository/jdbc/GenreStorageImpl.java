@@ -3,14 +3,12 @@ package ru.yandex.practicum.filmorate.repository.jdbc;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.repository.GenreStorage;
 
 import java.util.*;
 
 @Repository
-@Transactional
 @RequiredArgsConstructor
 public class GenreStorageImpl implements GenreStorage {
 

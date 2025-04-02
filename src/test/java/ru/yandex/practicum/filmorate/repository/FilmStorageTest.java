@@ -6,7 +6,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.TestFilmData;
-import ru.yandex.practicum.filmorate.exception.ExistException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.repository.jdbc.FilmStorageImpl;
 
@@ -23,14 +22,14 @@ class FilmStorageTest {
     private FilmStorage filmStorage;
 
     @Test
-    void shouldCreateAndGenerateIdForFilmEntity() throws ExistException {
+    void shouldCreateAndGenerateIdForFilmEntity() {
         Film newFilm = filmStorage.create(TestFilmData.getNewFilm());
         assertThat(newFilm).hasFieldOrPropertyWithValue("id", 1L);
     }
 
     @Test
     @Sql("/db/h2/tests/film-test-data.sql")
-    void shouldReadAndFindFilmEntityById() throws ExistException {
+    void shouldReadAndFindFilmEntityById() {
         Optional<Film> filmById = filmStorage.findById(1L);
 
         assertThat(filmById).get().hasNoNullFieldsOrProperties().hasFieldOrPropertyWithValue("id", 1L);
@@ -40,7 +39,7 @@ class FilmStorageTest {
 
     @Test
     @Sql("/db/h2/tests/film-test-data.sql")
-    void shouldUpdateFilmEntity() throws ExistException {
+    void shouldUpdateFilmEntity() {
         Film updated = filmStorage.update(TestFilmData.getFilm());
 
         assertThat(updated).hasNoNullFieldsOrProperties().hasFieldOrPropertyWithValue("id", 1L);
