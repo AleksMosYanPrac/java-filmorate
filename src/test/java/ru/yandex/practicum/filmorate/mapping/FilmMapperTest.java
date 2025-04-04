@@ -5,13 +5,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.yandex.practicum.filmorate.TestFilmData;
+import ru.yandex.practicum.filmorate.exception.ExistException;
 import ru.yandex.practicum.filmorate.model.dto.FilmData;
 import ru.yandex.practicum.filmorate.model.dto.FilmInfo;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.service.GenreService;
+import ru.yandex.practicum.filmorate.service.MPARatingService;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Set;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for the {@link FilmMapper}
@@ -23,17 +27,24 @@ public class FilmMapperTest {
     @Autowired
     private FilmMapper filmMapper;
 
+    @MockBean
+    private GenreService genreService;
+
+    @MockBean
+    private MPARatingService mpaRatingService;
+
     private Film film;
     private FilmData filmData;
     private FilmInfo filmInfo;
 
     @BeforeEach
-    void initData() {
-        LocalDate date = LocalDate.of(2000, 12, 12);
-        this.film = Film.builder().id(1L).name("test").description("-")
-                .releaseDate(date).duration(10).usersId(Set.of(2L, 3L)).build();
-        this.filmData = new FilmData(1L, "test", date, "-", 10);
-        this.filmInfo = new FilmInfo(1L, "test", date.format(DateTimeFormatter.ISO_DATE), "-", 10, 2);
+    void initData() throws ExistException {
+        this.film = TestFilmData.getFilm();
+        this.filmData = TestFilmData.getFilmData();
+        this.filmInfo = TestFilmData.getFilmInfo();
+
+        when(mpaRatingService.getMPARatingById(anyLong())).thenReturn(film.getMpaRating());
+        when(genreService.getGenresByIdList(anySet())).thenReturn(film.getGenres());
     }
 
     @Test
@@ -49,9 +60,8 @@ public class FilmMapperTest {
     }
 
     @Test
-    void shouldMapFilmDataToFilm() {
-        Film expectedFilm = Film.builder().id(1L).name("test").description("-")
-                .releaseDate(LocalDate.of(2000, 12, 12)).duration(10).build();
+    void shouldMapFilmDataToFilm() throws ExistException {
+        Film expectedFilm = this.film;
 
         Assertions.assertEquals(expectedFilm, filmMapper.toFilm(filmData));
     }

@@ -1,26 +1,31 @@
 package ru.yandex.practicum.filmorate.controller.serialization;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.boot.test.json.JacksonTester;
+import ru.yandex.practicum.filmorate.TestUserData;
 import ru.yandex.practicum.filmorate.model.dto.UserInfo;
 
-import java.util.Set;
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Checks serialization for {@link UserInfo}
  */
 
-public class UserInfoSerializationTest extends AbstractSerializationTest {
+@JsonTest
+public class UserInfoSerializationTest {
+
+    @Autowired
+    private JacksonTester<UserInfo> mapper;
 
     @Test
-    void shouldSerializeUserInfoObjectToJson() throws JsonProcessingException {
-        UserInfo user = new UserInfo();
-        user.setId(1);
-        user.setName("name");
-        user.setFriends(Set.of(2L, 3L));
-        String json = "{\"id\":1,\"name\":\"name\",\"user_friends\":[{\"id\":2},{\"id\":3}]}";
+    void shouldSerializeUserInfoObjectToJson() throws IOException {
+        UserInfo user = TestUserData.getUserInfo();
+        String json = TestUserData.getUserInfoJson();
 
-        Assertions.assertEquals(json, mapper.writeValueAsString(user));
+        assertThat(mapper.write(user)).isEqualToJson(json);
     }
 }

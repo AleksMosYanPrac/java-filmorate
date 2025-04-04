@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.mapping.UserMapper;
 import ru.yandex.practicum.filmorate.model.dto.UserData;
 import ru.yandex.practicum.filmorate.model.dto.UserInfo;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.user.User;
 
 @Component
 public class UserMapperImpl implements UserMapper {

@@ -7,16 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.TestUserData;
 import ru.yandex.practicum.filmorate.exception.ExistException;
-import ru.yandex.practicum.filmorate.mapping.impls.UserMapperImpl;
 import ru.yandex.practicum.filmorate.model.dto.UserData;
 import ru.yandex.practicum.filmorate.model.dto.UserInfo;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
@@ -31,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 @WebMvcTest({UserController.class})
-@Import(value = {UserMapperImpl.class})
 public class UserControllerTest {
 
     @Value("${filmorate.endpoints.users}")
@@ -50,10 +47,10 @@ public class UserControllerTest {
 
     @BeforeEach
     public void setup() {
-        this.userData = UserData.builder().id(1L).email("ex").login("asd").birthday(LocalDate.of(2000, 1, 1)).build();
-        this.userInfo = new UserInfo();
-        this.newUserJson = "{\"login\":\"qwe\",\"email\":\"test@email.com\",\"birthday\":\"2000-12-01\"}";
-        this.updateUserJson = "{\"id\":1,\"login\":\"qwe\",\"email\":\"test@email.com\",\"birthday\":\"2000-12-01\"}";
+        this.userData = TestUserData.getUserData();
+        this.userInfo = TestUserData.getUserInfo();
+        this.newUserJson = TestUserData.getNewUserDataJson();
+        this.updateUserJson = TestUserData.getUserDataJson();
     }
 
     @Test

@@ -3,6 +3,20 @@ spring:
     banner-mode: "off"
   application:
     name: "filmorate"
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db.h2.init/schema.sql
+      data-locations: classpath:db.h2.init/data.sql
+  datasource:
+    url: jdbc:h2:file:./db/filmorate
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  h2:
+    console:
+      enabled: true
+
 server:
   port: 8080
 
@@ -10,12 +24,8 @@ filmorate:
   endpoints:
     users: "/users"
     films: "/films"
+    mpa: "/mpa"
+    genres: "/genres"
   film:
     popular:
       count: 10
-
-  logging:
-    level:
-      org:
-        zalando:
-          logbook: TRACE

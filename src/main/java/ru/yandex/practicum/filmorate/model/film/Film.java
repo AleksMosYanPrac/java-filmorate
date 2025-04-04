@@ -1,7 +1,8 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.film;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import ru.yandex.practicum.filmorate.validation.AfterDate;
 
@@ -40,20 +41,17 @@ public class Film {
 
     @Positive
     long duration;
+    @EqualsAndHashCode.Exclude
+    Set<Genre> genres;
+
+    MPARating mpaRating;
 
     @Builder.Default
-    Set<Long> usersId = new HashSet<>();
+    @EqualsAndHashCode.Exclude
+    LikesRating likesRating = new LikesRating(null, new HashSet<>());
 
     public long rate() {
-        return usersId.size();
-    }
-
-    public boolean likeItBy(User user) {
-        return usersId.add(user.getId());
-    }
-
-    public boolean unlikeItBy(User user) {
-        return usersId.remove(user.getId());
+        return likesRating.getRating();
     }
 
     public String getFormattedReleaseDate() {

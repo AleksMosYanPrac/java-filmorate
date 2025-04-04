@@ -1,13 +1,12 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.user;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationGroup.*;
 
@@ -34,23 +33,19 @@ public class User {
     String email;
 
     String name;
-    String password;
 
     @Past(message = "must be a date in the past")
     LocalDate birthday;
 
     @Builder.Default
-    Set<Long> friendsId = new HashSet<>();
+    @EqualsAndHashCode.Exclude
+    Friends friends;
 
     public String getName() {
         return Objects.isNull(name) ? login : name;
     }
 
-    public boolean addFriend(User user) {
-        return friendsId.add(user.getId());
-    }
-
-    public boolean removeFriend(User user) {
-        return friendsId.remove(user.getId());
+    public Set<Long> getFriendsId() {
+        return friends.getFriendsId();
     }
 }

@@ -1,23 +1,32 @@
 package ru.yandex.practicum.filmorate.controller.serialization;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.boot.test.json.JacksonTester;
+import ru.yandex.practicum.filmorate.TestFilmData;
 import ru.yandex.practicum.filmorate.model.dto.FilmInfo;
+
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Checks serialization for {@link FilmInfo}
  */
 
-public class FilmInfoSerializationTest extends AbstractSerializationTest {
+@JsonTest
+public class FilmInfoSerializationTest {
+
+    @Autowired
+    private JacksonTester<FilmInfo> mapper;
 
     @Test
-    void shouldSerializeFilmInfoObjectToJson() throws JsonProcessingException {
-        FilmInfo film = new FilmInfo(1, "Name", "2000-12-12", "-", 10, 0);
-        String json = "{\"id\":1,\"name\":\"Name\",\"releaseDate\":\"2000-12-12\"," +
-                      "\"description\":\"-\",\"duration\":10,\"rate\":0}";
+    void shouldSerializeFilmInfoObjectToJson() throws IOException {
 
+        FilmInfo film = TestFilmData.getFilmInfo();
+        String json = TestFilmData.getFilmInfoJson();
 
-        Assertions.assertEquals(json, mapper.writeValueAsString(film));
+        assertThat(mapper.write(film)).isEqualToJson(json);
     }
 }

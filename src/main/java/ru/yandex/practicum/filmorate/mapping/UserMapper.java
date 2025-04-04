@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.mapping;
 
 import ru.yandex.practicum.filmorate.model.dto.UserData;
 import ru.yandex.practicum.filmorate.model.dto.UserInfo;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.user.User;
 
 public interface UserMapper {
 

@@ -5,12 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.TestUserData;
 import ru.yandex.practicum.filmorate.model.dto.UserData;
 import ru.yandex.practicum.filmorate.model.dto.UserInfo;
-import ru.yandex.practicum.filmorate.model.User;
-
-import java.time.LocalDate;
-import java.util.Set;
+import ru.yandex.practicum.filmorate.model.user.User;
 
 /**
  * Test class for the {@link UserMapper}
@@ -28,11 +26,9 @@ public class UserMapperTest {
 
     @BeforeEach
     void init() {
-        LocalDate date = LocalDate.of(2000, 12, 12);
-        this.user = User.builder().id(1L).login("login").email("email").name("test").birthday(date)
-                .friendsId(Set.of(2L)).build();
-        this.userData = UserData.builder().id(1L).login("login").email("email").name("test").birthday(date).build();
-        this.userInfo = createUserInfo();
+        this.user = TestUserData.getUser();
+        this.userData = TestUserData.getUserData();
+        this.userInfo = TestUserData.getUserInfo();
     }
 
     @Test
@@ -49,17 +45,7 @@ public class UserMapperTest {
 
     @Test
     void shouldMapUserDataToUser() {
-        User expectedUser = User.builder().id(1L).login("login").email("email").name("test")
-                .birthday(LocalDate.of(2000, 12, 12)).build();
 
-        Assertions.assertEquals(expectedUser, userMapper.toUser(userData));
-    }
-
-    private UserInfo createUserInfo() {
-        UserInfo userInfo = new UserInfo();
-        userInfo.setId(1L);
-        userInfo.setName("test");
-        userInfo.setFriends(Set.of(2L));
-        return userInfo;
+        Assertions.assertEquals(user, userMapper.toUser(userData));
     }
 }

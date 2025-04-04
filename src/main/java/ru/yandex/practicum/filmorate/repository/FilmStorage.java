@@ -1,26 +1,28 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.repository;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
-import ru.yandex.practicum.filmorate.exception.ExistException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.validation.ValidationGroup;
 
 import java.util.List;
+import java.util.Optional;
 
 @Validated
 public interface FilmStorage {
 
     @Validated(ValidationGroup.OnCreate.class)
-    Film add(@Valid @NotNull Film film) throws ExistException;
+    Film create(@Valid @NotNull Film film);
 
-    Film findById(long id) throws ExistException;
+    Optional<Film> findById(long id);
 
     @Validated(ValidationGroup.OnUpdate.class)
-    Film update(@Valid @NotNull Film film) throws ExistException;
+    Film update(@Valid @NotNull Film film);
 
-    List<Film> getAll();
+    List<Film> findAll();
 
     List<Film> sortByRateAndLimitResult(long listSize);
+
+    boolean exist(long id);
 }

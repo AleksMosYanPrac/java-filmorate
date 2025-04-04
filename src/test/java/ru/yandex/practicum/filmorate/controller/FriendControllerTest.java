@@ -5,10 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.ExistException;
-import ru.yandex.practicum.filmorate.mapping.impls.UserMapperImpl;
 import ru.yandex.practicum.filmorate.service.FriendService;
 
 import java.util.List;
@@ -26,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 @WebMvcTest({FriendController.class})
-@Import(value = {UserMapperImpl.class})
 public class FriendControllerTest {
 
     @Value("${filmorate.endpoints.users}")
